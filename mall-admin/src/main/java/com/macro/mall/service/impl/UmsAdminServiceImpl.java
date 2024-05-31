@@ -93,7 +93,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         }
         Map<String, String> params = new HashMap<>();
         params.put("client_id", AuthConstant.ADMIN_CLIENT_ID);
-        params.put("client_secret","123456");
+        params.put("client_secret","abdp9sHyIj9");
         params.put("grant_type","password");
         params.put("username",username);
         params.put("password",password);
