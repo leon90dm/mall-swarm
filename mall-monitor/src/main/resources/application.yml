@@ -5,8 +5,8 @@ spring:
     active: dev
   security: # 配置登录用户名和密码
     user:
-      name: macro
-      password: 123456
+      name: toursnap
+      password: abdp9sHyIj9
   boot:  # 不显示admin-server的监控信息
     admin:
       discovery:
