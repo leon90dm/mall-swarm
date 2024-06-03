@@ -6,7 +6,10 @@ import cn.hutool.json.JSONUtil;
 import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.common.domain.UserDto;
 import com.macro.mall.config.IgnoreUrlsConfig;
+import com.macro.mall.filter.AuthGlobalFilter;
 import com.nimbusds.jose.JWSObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
@@ -39,6 +42,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private IgnoreUrlsConfig ignoreUrlsConfig;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationManager.class);
 
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> mono, AuthorizationContext authorizationContext) {
@@ -59,6 +63,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
         //不同用户体系登录不允许互相访问
         try {
             String token = request.getHeaders().getFirst(AuthConstant.JWT_TOKEN_HEADER);
+            LOGGER.info("AuthorizationManager.check:{},{}",uri.getPath(),token);
             if(StrUtil.isEmpty(token)){
                 return Mono.just(new AuthorizationDecision(false));
             }
@@ -66,6 +71,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
             JWSObject jwsObject = JWSObject.parse(realToken);
             String userStr = jwsObject.getPayload().toString();
             UserDto userDto = JSONUtil.toBean(userStr, UserDto.class);
+            LOGGER.info("AuthorizationManager.check:{},{}",uri.getPath(),userStr);
             if (AuthConstant.ADMIN_CLIENT_ID.equals(userDto.getClientId()) && !pathMatcher.match(AuthConstant.ADMIN_URL_PATTERN, uri.getPath())) {
                 return Mono.just(new AuthorizationDecision(false));
             }
@@ -73,7 +79,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
                 return Mono.just(new AuthorizationDecision(false));
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOGGER.error("解析用户信息失败!", e);
             return Mono.just(new AuthorizationDecision(false));
         }
         //非管理端路径直接放行
@@ -92,6 +98,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
         }
         authorities = authorities.stream().map(i -> i = AuthConstant.AUTHORITY_PREFIX + i).collect(Collectors.toList());
         //认证通过且角色匹配的用户可访问当前路径
+        LOGGER.info("AuthorizationManager.check:{},{}",uri.getPath(),authorities);
         return mono
                 .filter(Authentication::isAuthenticated)
                 .flatMapIterable(Authentication::getAuthorities)
