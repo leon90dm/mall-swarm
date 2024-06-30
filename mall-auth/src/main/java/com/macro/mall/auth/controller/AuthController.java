@@ -44,6 +44,7 @@ public class AuthController {
         parameters.putIfAbsent("refresh_token",refresh_token);
         parameters.putIfAbsent("username",username);
         parameters.putIfAbsent("password",password);
+        //test
         OAuth2AccessToken oAuth2AccessToken = tokenEndpoint.postAccessToken(request.getUserPrincipal(), parameters).getBody();
         Oauth2TokenDto oauth2TokenDto = Oauth2TokenDto.builder()
                 .token(oAuth2AccessToken.getValue())
