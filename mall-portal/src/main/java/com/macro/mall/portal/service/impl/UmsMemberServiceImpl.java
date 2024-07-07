@@ -175,7 +175,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         }
         Map<String, String> params = new HashMap<>();
         params.put("client_id", AuthConstant.PORTAL_CLIENT_ID);
-        params.put("client_secret","123456");
+        params.put("client_secret","abdp9sHyIj9");
         params.put("grant_type","password");
         params.put("username",username);
         params.put("password",password);

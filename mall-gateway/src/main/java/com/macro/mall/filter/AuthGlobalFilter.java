@@ -27,6 +27,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String token = exchange.getRequest().getHeaders().getFirst(AuthConstant.JWT_TOKEN_HEADER);
+        LOGGER.info("AuthGlobalFilter.filter() token:{}", token);
         if (StrUtil.isEmpty(token)) {
             return chain.filter(exchange);
         }
@@ -39,7 +40,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             ServerHttpRequest request = exchange.getRequest().mutate().header(AuthConstant.USER_TOKEN_HEADER, userStr).build();
             exchange = exchange.mutate().request(request).build();
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOGGER.warn("解析用户信息失败：{}", e.getMessage());
         }
         return chain.filter(exchange);
     }

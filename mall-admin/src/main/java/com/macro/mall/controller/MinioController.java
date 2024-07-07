@@ -30,6 +30,8 @@ public class MinioController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MinioController.class);
     @Value("${minio.endpoint}")
     private String ENDPOINT;
+    @Value("${minio.read_endpoint}")
+    private String READ_ENDPOINT;
     @Value("${minio.bucketName}")
     private String BUCKET_NAME;
     @Value("${minio.accessKey}")
@@ -74,11 +76,10 @@ public class MinioController {
             LOGGER.info("文件上传成功!");
             MinioUploadDto minioUploadDto = new MinioUploadDto();
             minioUploadDto.setName(filename);
-            minioUploadDto.setUrl(ENDPOINT + "/" + BUCKET_NAME + "/" + objectName);
+            minioUploadDto.setUrl(READ_ENDPOINT + "/" + BUCKET_NAME + "/" + objectName);
             return CommonResult.success(minioUploadDto);
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.info("上传发生错误: {}！", e.getMessage());
+            LOGGER.error("上传发生错误: {}！", e.getMessage(), e);
         }
         return CommonResult.failed();
     }
@@ -107,7 +108,7 @@ public class MinioController {
             minioClient.removeObject(RemoveObjectArgs.builder().bucket(BUCKET_NAME).object(objectName).build());
             return CommonResult.success(null);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("删除失败：{}", e.getMessage(), e);
         }
         return CommonResult.failed();
     }
