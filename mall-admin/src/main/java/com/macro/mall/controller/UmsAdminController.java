@@ -1,15 +1,20 @@
 package com.macro.mall.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.common.api.ResultCode;
+import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.common.domain.UserDto;
+import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.dto.UmsAdminLoginParam;
 import com.macro.mall.dto.UmsAdminParam;
 import com.macro.mall.dto.UpdateAdminPasswordParam;
 import com.macro.mall.model.UmsAdmin;
 import com.macro.mall.model.UmsPermission;
 import com.macro.mall.model.UmsRole;
+import com.macro.mall.service.AuthService;
 import com.macro.mall.service.UmsAdminService;
 import com.macro.mall.service.UmsRoleService;
 import io.swagger.annotations.Api;
@@ -17,8 +22,11 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +44,8 @@ public class UmsAdminController {
     private UmsAdminService adminService;
     @Autowired
     private UmsRoleService roleService;
+    @Autowired
+    private AuthService authService;
 
     @ApiOperation(value = "用户注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -51,8 +61,24 @@ public class UmsAdminController {
     @ApiOperation(value = "登录以后返回token")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult login(@Validated @RequestBody UmsAdminLoginParam umsAdminLoginParam) {
-        return adminService.login(umsAdminLoginParam.getUsername(),umsAdminLoginParam.getPassword());
+    public CommonResult login(HttpServletRequest request, @Validated @RequestBody UmsAdminLoginParam umsAdminLoginParam) throws HttpRequestMethodNotSupportedException {
+        if(StrUtil.isEmpty(umsAdminLoginParam.getUsername())||StrUtil.isEmpty(umsAdminLoginParam.getPassword())){
+            Asserts.fail("用户名或密码不能为空！");
+        }
+        Map<String, String> params = new HashMap<>();
+        params.put("client_id", AuthConstant.ADMIN_CLIENT_ID);
+        params.put("client_secret","abdp9sHyIj9");
+        params.put("grant_type","password");
+        params.put("username",umsAdminLoginParam.getUsername());
+        params.put("password",umsAdminLoginParam.getPassword());
+        Principal userPrincipal = request.getUserPrincipal();
+
+        CommonResult restResult = authService.getAccessToken(params,userPrincipal);
+        if(ResultCode.SUCCESS.getCode()==restResult.getCode()&&restResult.getData()!=null){
+//            updateLoginTimeByUsername(username);
+            adminService.insertLoginLog(umsAdminLoginParam.getUsername());
+        }
+        return restResult;
     }
 
     @ApiOperation(value = "获取当前登录用户信息")

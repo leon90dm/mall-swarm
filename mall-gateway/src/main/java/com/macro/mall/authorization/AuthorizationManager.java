@@ -6,7 +6,6 @@ import cn.hutool.json.JSONUtil;
 import com.macro.mall.common.constant.AuthConstant;
 import com.macro.mall.common.domain.UserDto;
 import com.macro.mall.config.IgnoreUrlsConfig;
-import com.macro.mall.filter.AuthGlobalFilter;
 import com.nimbusds.jose.JWSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

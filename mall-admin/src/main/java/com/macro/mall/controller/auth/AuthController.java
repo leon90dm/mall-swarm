@@ -1,8 +1,9 @@
-package com.macro.mall.auth.controller;
+package com.macro.mall.controller.auth;
 
-import com.macro.mall.auth.domain.Oauth2TokenDto;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.common.constant.AuthConstant;
+import com.macro.mall.domain.Oauth2TokenDto;
+import com.macro.mall.service.AuthService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -10,9 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +31,7 @@ import java.util.Map;
 public class AuthController {
 
     @Autowired
-    private TokenEndpoint tokenEndpoint;
+    private AuthService authService;
 
     @ApiOperation("Oauth2获取token")
     @RequestMapping(value = "/token", method = RequestMethod.POST)
@@ -44,13 +49,8 @@ public class AuthController {
         parameters.putIfAbsent("refresh_token",refresh_token);
         parameters.putIfAbsent("username",username);
         parameters.putIfAbsent("password",password);
-        OAuth2AccessToken oAuth2AccessToken = tokenEndpoint.postAccessToken(request.getUserPrincipal(), parameters).getBody();
-        Oauth2TokenDto oauth2TokenDto = Oauth2TokenDto.builder()
-                .token(oAuth2AccessToken.getValue())
-                .refreshToken(oAuth2AccessToken.getRefreshToken().getValue())
-                .expiresIn(oAuth2AccessToken.getExpiresIn())
-                .tokenHead(AuthConstant.JWT_TOKEN_PREFIX).build();
-
-        return CommonResult.success(oauth2TokenDto);
+        Principal userPrincipal = request.getUserPrincipal();
+        //test
+        return authService.getAccessToken(parameters,userPrincipal);
     }
 }

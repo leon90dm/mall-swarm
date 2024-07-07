@@ -86,30 +86,12 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         return umsAdmin;
     }
 
-    @Override
-    public CommonResult login(String username, String password) {
-        if(StrUtil.isEmpty(username)||StrUtil.isEmpty(password)){
-            Asserts.fail("用户名或密码不能为空！");
-        }
-        Map<String, String> params = new HashMap<>();
-        params.put("client_id", AuthConstant.ADMIN_CLIENT_ID);
-        params.put("client_secret","abdp9sHyIj9");
-        params.put("grant_type","password");
-        params.put("username",username);
-        params.put("password",password);
-        CommonResult restResult = authService.getAccessToken(params);
-        if(ResultCode.SUCCESS.getCode()==restResult.getCode()&&restResult.getData()!=null){
-//            updateLoginTimeByUsername(username);
-            insertLoginLog(username);
-        }
-        return restResult;
-    }
-
     /**
      * 添加登录记录
      * @param username 用户名
      */
-    private void insertLoginLog(String username) {
+    @Override
+    public void insertLoginLog(String username) {
         UmsAdmin admin = getAdminByUsername(username);
         if(admin==null) return;
         UmsAdminLoginLog loginLog = new UmsAdminLoginLog();

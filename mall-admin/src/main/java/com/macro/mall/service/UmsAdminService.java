@@ -25,12 +25,11 @@ public interface UmsAdminService {
     UmsAdmin register(UmsAdminParam umsAdminParam);
 
     /**
-     * 登录功能
+     * 记录日志
+     *
      * @param username 用户名
-     * @param password 密码
-     * @return 调用认证中心返回结果
      */
-    CommonResult login(String username, String password);
+    void insertLoginLog(String username);
 
     /**
      * 根据用户id获取用户

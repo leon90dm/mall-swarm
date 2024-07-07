@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: 'http://localhost:8201/mall-auth/rsa/publicKey'
+          jwk-set-uri: 'http://localhost:8080/mall-admin/rsa/publicKey'
 logging:
   level:
     root: info
